@@ -9,6 +9,11 @@ import App from './App';
 import router from './router';
 import store from './store';
 
+import VueSplit from 'vue-split-panel';
+import 'vue-split-panel/dist/styles/vue-split-panel.css';
+
+Vue.use(VueSplit);
+
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'));
 Vue.config.productionTip = false;
 

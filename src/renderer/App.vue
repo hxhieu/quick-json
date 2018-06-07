@@ -15,6 +15,13 @@ html,
 body {
   font-family: sans-serif;
   font-size: 14px;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+#app {
+  height: 100%;
 }
 
 label {

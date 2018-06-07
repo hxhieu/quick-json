@@ -9,6 +9,14 @@ export default new Router({
       path: '/',
       name: 'shell',
       component: require('@/components/Shell').default,
+      children: [
+        {
+          path: '/browse/:path',
+          name: 'browse',
+          component: require('@/components/DirBrowser').default,
+          props: true,
+        },
+      ],
     },
     {
       path: '*',

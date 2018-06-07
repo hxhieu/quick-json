@@ -1,12 +1,15 @@
 <template>
-  <div>
+  <div class="dir-selector">
     <el-form label-width="90px">
       <el-form-item label="Working dir">
         <el-input readonly :value="cwd">
           <template slot="append">
-            <el-button slot="append" icon="el-icon-more" @click="setWorkingDir"></el-button>
+            <el-button slot="append" @click="setWorkingDir">Set CWD</el-button>
           </template>
         </el-input>
+      </el-form-item>
+      <el-form-item label="Current path">
+        <el-input readonly :value="cwd"></el-input>
       </el-form-item>
     </el-form>
   </div>
@@ -18,7 +21,7 @@ import { mapMutations, mapState } from 'vuex';
 import { SET_CWD } from '@/store';
 
 export default {
-  name: 'cwd-selector',
+  name: 'dir-selector',
   data: () => ({}),
   methods: {
     ...mapMutations('Shell', {
@@ -36,5 +39,10 @@ export default {
 };
 </script>
 
-<style>
+<style lang="scss">
+.dir-selector {
+  .el-form-item {
+    margin: 0px;
+  }
+}
 </style>
