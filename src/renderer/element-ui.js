@@ -15,6 +15,7 @@ import {
   Input,
   Form,
   FormItem,
+  Tree,
 } from 'element-ui';
 
 Vue.prototype.$ELEMENT = { size: 'small' };
@@ -30,6 +31,7 @@ Vue.component(Card.name, Card);
 Vue.component(Input.name, Input);
 Vue.component(Form.name, Form);
 Vue.component(FormItem.name, FormItem);
+Vue.component(Tree.name, Tree);
 
 // configure language
 locale.use(lang);

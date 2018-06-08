@@ -27,8 +27,19 @@ export const listDirs = (dirPath, pattern) =>
             }
           }
         });
-
+        //TODO: Sorting
         resolve(dirs.sort().concat(files.sort()));
+      }
+    });
+  });
+
+export const readTextFile = path =>
+  new Promise((resolve, reject) => {
+    fs.readFile(path, 'utf8', function(err, data) {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data);
       }
     });
   });

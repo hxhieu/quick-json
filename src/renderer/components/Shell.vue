@@ -1,16 +1,7 @@
 <template>
   <div id="shell">
     <dir-selector class="selector" />
-    <Split class="panes">
-      <SplitArea :size="33">
-        <router-view class="pane" />
-      </SplitArea>
-      <SplitArea :size="67">
-        <div class="pane">
-          panel right
-        </div>
-      </SplitArea>
-    </Split>
+    <router-view />
   </div>
 </template>
 
@@ -23,16 +14,15 @@ export default {
   name: 'shell',
   components: {
     [DirSelector.name]: DirSelector,
-    [DirBrowser.name]: DirBrowser,
   },
-  computed:{
-    ...mapState('Shell', ['cwd'])
+  computed: {
+    ...mapState('Shell', ['cwd']),
   },
-  watch:{
-    cwd(val){
-      this.$router.push(`/browse/${btoa(val)}`)
-    }
-  }
+  watch: {
+    cwd(val) {
+      this.$router.push(`/working/${btoa(val)}`);
+    },
+  },
 };
 </script>
 
@@ -47,15 +37,6 @@ export default {
 
   .bread-crumb {
     padding: 0px 20px 10px 20px;
-  }
-  .panes {
-    height: calc(100% - 85px);
-
-    .pane {
-      padding: 10px;
-      height: calc(100% - 20px);
-      background: #fff;
-    }
   }
 }
 </style>

@@ -18,14 +18,14 @@
 import { mapMutations } from 'vuex';
 import { SET_CWD } from '@/store/types';
 import { listDirs } from '@proc/file-system';
-import FontAwesomeIcon from '@fortawesome/vue-fontawesome'
-import { faFileCode, faFolder } from '@fortawesome/fontawesome-free-regular'
-import { faArrowLeft } from '@fortawesome/fontawesome-free-solid'
+import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
+import { faFileCode, faFolder } from '@fortawesome/fontawesome-free-regular';
+import { faArrowLeft } from '@fortawesome/fontawesome-free-solid';
 
 export default {
   name: 'dir-browser',
   components: {
-    FontAwesomeIcon
+    FontAwesomeIcon,
   },
   props: {
     glob: String,
@@ -34,37 +34,70 @@ export default {
   data: () => ({
     dirs: [],
   }),
-  methods:{
-    goto(dir){
-      if (dir.type === 'dir'){
-        var path = atob(this.path);
-        this.$router.push(`/browse/${btoa(`${path}/${dir.name}`)}`);
+  created() {
+    this.loadDir = () => {
+      listDirs(atob(this.path), this.glob || '*.json').then(dirs => {
+        this.dirs = dirs;
+        // Insert Go Back node
+        this.dirs.splice(0, 0, { name: '[...]', type: 'back' });
+      });
+    };
+
+    //First load
+    this.loadDir();
+  },
+  methods: {
+    goto(dir) {
+      var path = this.path;
+      switch (dir.type) {
+        case 'dir':
+          // Decrypt current path
+          path = atob(path);
+          // Append selected path and encrypt
+          path = btoa(`${path}/${dir.name}`);
+          this.$router.push({
+            name: 'working',
+            params: {
+              path,
+            },
+          });
+          break;
+        case 'file':
+          const name = btoa(dir.name);
+          this.$router.push({
+            name: 'working/file',
+            params: {
+              path,
+              name,
+            },
+          });
+          break;
+        case 'back':
+          break;
       }
     },
-    getIcon(dir){
-      return dir.type === 'dir' ? faFolder
-        : dir.type === 'file' ? faFileCode
-        : dir.type === 'back' ? faArrowLeft
-        : ''
-    }
+    getIcon(dir) {
+      return dir.type === 'dir'
+        ? faFolder
+        : dir.type === 'file'
+          ? faFileCode
+          : dir.type === 'back' ? faArrowLeft : '';
+    },
   },
   computed: {
     ...mapMutations('Shell', {
-      setCwd: SET_CWD
+      setCwd: SET_CWD,
     }),
-    iconFile(){
+    iconFile() {
       return faFileCode;
     },
-    iconFolder(){
+    iconFolder() {
       return faFolder;
-    }
+    },
   },
   watch: {
-    path(val) {
-      listDirs(atob(val), this.glob || '*.json').then(dirs => {
-        this.dirs = dirs;
-        this.dirs.splice(0 ,0, { name: '[...]', type: 'back' });
-      });
+    path() {
+      this.loadDir();
     },
   },
 };
@@ -91,8 +124,7 @@ export default {
       padding: 5px;
 
       &:hover {
-        background: #000;
-        color: #fff;
+        background: #f5f5f5;
       }
     }
   }

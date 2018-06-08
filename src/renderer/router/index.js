@@ -11,10 +11,18 @@ export default new Router({
       component: require('@/components/Shell').default,
       children: [
         {
-          path: '/browse/:path',
-          name: 'browse',
-          component: require('@/components/DirBrowser').default,
+          path: '/working/:path',
+          name: 'working',
+          component: require('@/components/WorkingPane').default,
           props: true,
+          children: [
+            {
+              path: '/working/:path/file/:name',
+              name: 'working/file',
+              component: require('@/components/FileInspector').default,
+              props: true,
+            },
+          ],
         },
       ],
     },
