@@ -6,14 +6,27 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapMutations } from 'vuex';
 import DirSelector from '@/components/DirSelector';
 import DirBrowser from '@/components/DirBrowser';
+import { SET_CWD } from '@/store/types';
 
 export default {
   name: 'shell',
   components: {
     [DirSelector.name]: DirSelector,
+  },
+  created() {
+    // Reload current path
+    if (this.$route.params.path && !this.cwd) {
+      var currentPath = atob(this.$route.params.path);
+      this.setCwd(currentPath);
+    }
+  },
+  methods: {
+    ...mapMutations('Shell', {
+      setCwd: SET_CWD,
+    }),
   },
   computed: {
     ...mapState('Shell', ['cwd']),

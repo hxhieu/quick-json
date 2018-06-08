@@ -18,7 +18,7 @@
 <script>
 import { browseDir } from '@proc/proc';
 import { mapMutations, mapState } from 'vuex';
-import { SET_CWD } from '@/store';
+import { SET_CWD } from '@/store/types';
 
 export default {
   name: 'dir-selector',
