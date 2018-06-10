@@ -1,21 +1,47 @@
 <template>
   <div class="file-inspector">
-    <div class="tree-scroller">
-      <el-tree :data="topLevelTree" :props="treeOpts" :load="loadNode" lazy @node-click="handleNodeClick"></el-tree>
-    </div>
     <div class="prop-editor">
-      {{ selectedValue }}
+      <el-input v-model="selectedNode.value"
+        :disabled="!canEdit"
+        @keyup.enter="saveCurrent">
+      </el-input>
+      <el-switch
+        v-model="selectedIsString"
+        active-text="String"
+        :disabled="!canEdit">
+      </el-switch>
+      <el-button type="primary" plain @click="saveCurrent" :disabled="!canEdit">Save</el-button>
+      <el-button type="default" plain @click="resetCurrent" :disabled="!canEdit">Reset</el-button>
+    </div>
+    <div class="tree-scroller">
+      <el-tree
+        lazy
+        :node-key="`${path ? path.toString() : ''}.${name}`"
+        :data="topLevelTree"
+        :props="treeOpts"
+        :load="loadNode"
+        @node-click="handleNodeClick">
+          <span class="custom-node" slot-scope="{ data }">
+            <span>{{ data.label }}</span>
+            <span class="custom-node-value" v-if="data.leaf">{{ data.value }}</span>
+          </span>
+        </el-tree>
     </div>
   </div>
 </template>
 
 <script>
 import { readTextFile } from '@proc/file-system';
+import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
+import { faFileCode, faFolder, faClone, faCircle } from '@fortawesome/fontawesome-free-regular';
 
 const isObject = (obj, prop) => obj[prop] !== Object(obj[prop]);
 
 export default {
   name: 'file-inspector',
+   components: {
+    FontAwesomeIcon,
+  },
   props: {
     path: String,
     name: String,
@@ -26,7 +52,12 @@ export default {
       name: 'label',
       isLeaf: 'leaf',
     },
+    selectedNode: {
+      value: null
+    },
     selectedValue: null,
+    selectedIsString: true,
+    canEdit: false,
   }),
   created() {
     this.loadFile = () => {
@@ -51,11 +82,17 @@ export default {
   methods: {
     handleNodeClick(node) {
       if (!node.leaf) {
+        this.canEdit = false;
+        this.selectedValue = null;
+        this.selectedNode = {};
         return;
       }
-
-      const data = this.getValueFromExpression(node.path);
-      this.selectedValue = data[node.label];
+      this.canEdit = true;
+      this.selectedValue = node.value;
+      this.selectedNode = node;
+    },
+    resetCurrent(){
+      this.selectedNode.value = this.selectedValue;
     },
     loadNode(node, resolve) {
       if (node.level === 0) {
@@ -76,10 +113,17 @@ export default {
         Object.keys(data).map(x => ({
           label: x,
           leaf: isObject(data, x),
+          value: data[x],
           path: expressionTree,
         })),
       );
     },
+    saveCurrent(){
+      this.$message({
+          message: 'Congrats, this is a success message.',
+          type: 'success'
+        });
+    }
   },
   computed: {
     filePath() {
@@ -93,12 +137,19 @@ export default {
         const node = {
           label: x,
           leaf: isObject(this.file, x),
+          value: this.file[x],
           path: null,
         };
         tree.push(node);
       });
 
       return tree;
+    },
+    iconFile() {
+      return faFileCode;
+    },
+    iconFolder() {
+      return faFolder;
     },
   },
   watch: {
@@ -113,14 +164,35 @@ export default {
 .file-inspector {
   height: 100%;
   overflow: hidden;
+  .el-tree {
+    .custom-node {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .custom-node-value {
+        font-weight: bold;
+        padding: 0 20px;
+      }
+    }
+  }
   .prop-editor {
     background: #eee;
-    height: 100px;
-    padding: 10px;
+    height: 32px;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px 10px 0;
+    .el-button,
+    .el-switch {
+      margin-left: 10px;
+    }
   }
   .tree-scroller {
-    height: calc(100% - 100px);
-    overflow-y: scroll;
+    height: calc(100% - 42px);
+    overflow-y: auto;
+    overflow-x: hidden;
   }
 }
 </style>

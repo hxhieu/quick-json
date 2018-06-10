@@ -16,6 +16,8 @@ import {
   Form,
   FormItem,
   Tree,
+  Message,
+  Switch,
 } from 'element-ui';
 
 Vue.prototype.$ELEMENT = { size: 'small' };
@@ -32,6 +34,9 @@ Vue.component(Input.name, Input);
 Vue.component(Form.name, Form);
 Vue.component(FormItem.name, FormItem);
 Vue.component(Tree.name, Tree);
+Vue.component(Switch.name, Switch);
+
+Vue.prototype.$message = Message;
 
 // configure language
 locale.use(lang);

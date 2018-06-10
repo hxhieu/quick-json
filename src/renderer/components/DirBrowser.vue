@@ -88,12 +88,6 @@ export default {
     ...mapMutations('Shell', {
       setCwd: SET_CWD,
     }),
-    iconFile() {
-      return faFileCode;
-    },
-    iconFolder() {
-      return faFolder;
-    },
   },
   watch: {
     path() {
