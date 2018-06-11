@@ -31,8 +31,8 @@
 </template>
 
 <script>
-import { readTextFile } from '@proc/file-system';
-import { isString, get, isObject } from 'lodash';
+import { readTextFile, saveJsonFile } from '@proc/file-system';
+import { get, isObject, set } from 'lodash';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import { faFileCode, faFolder, faClone, faCircle } from '@fortawesome/fontawesome-free-regular';
 
@@ -54,13 +54,18 @@ export default {
     selectedNode: null,
     resetValue: null,
     canEdit: false,
-    isString: true
+    isString: false
   }),
   created() {
     this.loadFile = () => {
       if (!this.filePath) return;
       readTextFile(this.filePath).then(txt => {
         this.file = JSON.parse(txt);
+      }).catch(err => {
+        this.$message({
+          message: `Error opening file. ERROR: ${err}`,
+          type: 'error'
+        });
       });
     };
 
@@ -117,10 +122,43 @@ export default {
       );
     },
     saveCurrent(){
-      this.$message({
-          message: 'Congrats, this is a success message.',
+      let saveMsg = 'Value saved as ';
+
+      if (this.isString){
+        set(this.file, this.selectedNode.path, this.selectedValue);
+        saveMsg += 'string.';
+      }
+      else {
+        if (parseFloat(this.selectedValue)){
+          const numberValue = parseFloat(this.selectedValue);
+          this.selectedNode.value = numberValue;
+          set(this.file, this.selectedNode.path, numberValue);
+          saveMsg += 'number.';
+        }
+        else if (this.selectedValue === 'true' || this.selectedValue === 'false'){
+          var boolValue = this.selectedValue === 'true';
+          this.selectedNode.value = boolValue;
+          set(this.file, this.selectedNode.path, boolValue);
+          saveMsg += 'boolean.';
+        }
+        else{
+          set(this.file, this.selectedNode.path, this.selectedValue);
+          saveMsg += 'string.';
+        }
+      }
+
+      saveJsonFile(this.filePath, this.file).then(() => {
+        this.resetValue = this.selectedValue;
+        this.$message({
+          message: saveMsg,
           type: 'success'
+        }); 
+      }).catch(err => {
+        this.$message({
+          message: `Error saving file. ERROR: ${err}`,
+          type: 'error'
         });
+      });
     }
   },
   computed: {
@@ -146,7 +184,6 @@ export default {
     selectedValue:{
       get(){
         if (!this.selectedNode || !this.selectedNode.value) return '';
-        this.isString = isString(this.selectedNode.value);
         return this.selectedNode.value.toString();
       },
       set(val){

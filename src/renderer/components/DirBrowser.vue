@@ -40,6 +40,11 @@ export default {
         this.dirs = dirs;
         // Insert Go Back node
         this.dirs.splice(0, 0, { name: '[...]', type: 'back' });
+      }).catch(err => {
+        this.$message({
+          message: `Error loading directory. ERROR: ${err}`,
+          type: 'error'
+        });
       });
     };
 

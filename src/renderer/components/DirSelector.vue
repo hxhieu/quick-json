@@ -30,6 +30,11 @@ export default {
     setWorkingDir() {
       browseDir().then(dir => {
         this.setCwd(dir);
+      }).catch(err => {
+        this.$message({
+          message: `Error opening directory brower. ERROR: ${err}`,
+          type: 'error'
+        });
       });
     },
   },
