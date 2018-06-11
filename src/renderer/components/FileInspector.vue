@@ -1,12 +1,12 @@
 <template>
   <div class="file-inspector">
     <div class="prop-editor">
-      <el-input v-model="selectedNode.value"
+      <el-input v-model="selectedValue"
         :disabled="!canEdit"
         @keyup.enter="saveCurrent">
       </el-input>
       <el-switch
-        v-model="selectedIsString"
+        v-model="isString"
         active-text="String"
         :disabled="!canEdit">
       </el-switch>
@@ -32,10 +32,9 @@
 
 <script>
 import { readTextFile } from '@proc/file-system';
+import { isString, get, isObject } from 'lodash';
 import FontAwesomeIcon from '@fortawesome/vue-fontawesome';
 import { faFileCode, faFolder, faClone, faCircle } from '@fortawesome/fontawesome-free-regular';
-
-const isObject = (obj, prop) => obj[prop] !== Object(obj[prop]);
 
 export default {
   name: 'file-inspector',
@@ -52,12 +51,10 @@ export default {
       name: 'label',
       isLeaf: 'leaf',
     },
-    selectedNode: {
-      value: null
-    },
-    selectedValue: null,
-    selectedIsString: true,
+    selectedNode: null,
+    resetValue: null,
     canEdit: false,
+    isString: true
   }),
   created() {
     this.loadFile = () => {
@@ -83,16 +80,17 @@ export default {
     handleNodeClick(node) {
       if (!node.leaf) {
         this.canEdit = false;
-        this.selectedValue = null;
+        this.resetValue = null;
         this.selectedNode = {};
         return;
       }
+
       this.canEdit = true;
-      this.selectedValue = node.value;
+      this.resetValue = node.value;
       this.selectedNode = node;
     },
     resetCurrent(){
-      this.selectedNode.value = this.selectedValue;
+      this.selectedNode.value = this.resetValue;
     },
     loadNode(node, resolve) {
       if (node.level === 0) {
@@ -105,16 +103,16 @@ export default {
         expressionTree.push(currentNode.label);
         currentNode = currentNode.parent;
       }
-      expressionTree = expressionTree.reverse();
+      const path = expressionTree.reverse().join('.');
 
-      var data = this.getValueFromExpression(expressionTree);
+      var data = get(this.file, path);
 
       return resolve(
         Object.keys(data).map(x => ({
           label: x,
-          leaf: isObject(data, x),
+          leaf: !isObject(data[x]),
           value: data[x],
-          path: expressionTree,
+          path: `${expressionTree}.${x}`
         })),
       );
     },
@@ -136,14 +134,24 @@ export default {
       Object.keys(this.file).forEach(x => {
         const node = {
           label: x,
-          leaf: isObject(this.file, x),
+          leaf: !isObject(this.file[x]),
           value: this.file[x],
-          path: null,
+          path: x,
         };
         tree.push(node);
       });
 
       return tree;
+    },
+    selectedValue:{
+      get(){
+        if (!this.selectedNode || !this.selectedNode.value) return '';
+        this.isString = isString(this.selectedNode.value);
+        return this.selectedNode.value.toString();
+      },
+      set(val){
+        this.selectedNode.value = val;
+      }
     },
     iconFile() {
       return faFileCode;
